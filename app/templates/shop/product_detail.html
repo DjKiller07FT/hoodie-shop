@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.nombre }} - Hoodie Shop{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('shop.catalog') }}">Catálogo</a></li>
+        <li class="breadcrumb-item active">{{ product.nombre }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <img src="{{ product.imagen if product.imagen else '/static/img/placeholder.jpg' }}" 
+             class="img-fluid rounded shadow" 
+             alt="{{ product.nombre }}">
+    </div>
+    
+    <div class="col-md-6">
+        <h1>{{ product.nombre }}</h1>
+        <h3 class="text-primary mb-4">${{ "{:,.0f}".format(product.precio) }} COP</h3>
+        
+        <p class="lead">{{ product.descripcion }}</p>
+        
+        <hr>
+        
+        <form method="POST" action="{{ url_for('shop.add_to_cart') }}">
+            <input type="hidden" name="product_id" value="{{ product._id }}">
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Talla *</label>
+                <div class="btn-group w-100" role="group">
+                    {% for talla in ['S', 'M', 'L', 'XL'] %}
+                    <input type="radio" class="btn-check" name="talla" id="talla_{{ talla }}" value="{{ talla }}" 
+                           {% if product.stock[talla] == 0 %}disabled{% endif %}
+                           {% if loop.first and product.stock[talla] > 0 %}checked{% endif %}>
+                    <label class="btn btn-outline-primary" for="talla_{{ talla }}">
+                        {{ talla }}
+                        {% if product.stock[talla] == 0 %}
+                        <span class="badge bg-danger">Agotado</span>
+                        {% else %}
+                        <span class="badge bg-success">{{ product.stock[talla] }}</span>
+                        {% endif %}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Color *</label>
+                <select class="form-select" name="color" required>
+                    {% for color in product.colores %}
+                    <option value="{{ color }}">{{ color }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Cantidad *</label>
+                <input type="number" class="form-control" name="cantidad" value="1" min="1" max="10" required>
+            </div>
+            
+            <div class="d-grid gap-2">
+                {% if product.get_stock_total() > 0 %}
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-cart-plus"></i> Agregar al Carrito
+                </button>
+                {% else %}
+                <button type="button" class="btn btn-secondary btn-lg" disabled>
+                    <i class="bi bi-x-circle"></i> Sin Stock
+                </button>
+                {% endif %}
+                <a href="{{ url_for('shop.catalog') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver al Catálogo
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

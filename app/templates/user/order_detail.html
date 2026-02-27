@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Pedido {{ order.numero_pedido }} - Hoodie Shop{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('user.orders') }}">Mis Pedidos</a></li>
+        <li class="breadcrumb-item active">{{ order.numero_pedido }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-receipt"></i> Pedido {{ order.numero_pedido }}</h1>
+    {% if order.estado == 'RECIBIDO' %}
+    <span class="badge bg-primary fs-5">{{ order.estado }}</span>
+    {% elif order.estado == 'ALISTAMIENTO' %}
+    <span class="badge bg-warning fs-5">{{ order.estado }}</span>
+    {% elif order.estado == 'ENVIO' %}
+    <span class="badge bg-info fs-5">{{ order.estado }}</span>
+    {% else %}
+    <span class="badge bg-success fs-5">{{ order.estado }}</span>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Productos -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-bag"></i> Productos</h5>
+            </div>
+            <div class="card-body">
+                {% for item in order.items %}
+                <div class="row align-items-center border-bottom py-3">
+                    <div class="col-md-6">
+                        <h6 class="mb-1">{{ item.nombre }}</h6>
+                        <p class="text-muted mb-0">
+                            <small>Talla: {{ item.talla }} | Color: {{ item.color }}</small>
+                        </p>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <span class="badge bg-info">x{{ item.cantidad }}</span>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">${{ "{:,.0f}".format(item.precio_unitario) }}</small>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <strong>${{ "{:,.0f}".format(item.subtotal) }}</strong>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <h5 class="mb-0">Total:</h5>
+                    <h4 class="text-primary mb-0">${{ "{:,.0f}".format(order.total) }} COP</h4>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Datos de Envío -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-truck"></i> Datos de Envío</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Nombre:</strong> {{ order.direccion_envio.nombre }}</p>
+                <p><strong>Teléfono:</strong> {{ order.direccion_envio.telefono }}</p>
+                <p><strong>Dirección:</strong> {{ order.direccion_envio.direccion }}</p>
+                <p><strong>Ciudad:</strong> {{ order.direccion_envio.ciudad }}</p>
+                {% if order.direccion_envio.notas %}
+                <p><strong>Notas:</strong> {{ order.direccion_envio.notas }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Seguimiento -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Seguimiento</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for cambio in order.historial_estados %}
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center">
+                            {% if cambio.estado == 'RECIBIDO' %}
+                            <i class="bi bi-check-circle-fill text-primary fs-4 me-2"></i>
+                            {% elif cambio.estado == 'ALISTAMIENTO' %}
+                            <i class="bi bi-box-seam-fill text-warning fs-4 me-2"></i>
+                            {% elif cambio.estado == 'ENVIO' %}
+                            <i class="bi bi-truck text-info fs-4 me-2"></i>
+                            {% else %}
+                            <i class="bi bi-check-circle-fill text-success fs-4 me-2"></i>
+                            {% endif %}
+                            <div>
+                                <strong>{{ cambio.estado }}</strong>
+                                <br>
+                                <small class="text-muted">{{ cambio.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Info -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Información</h6>
+                <hr>
+                <p><strong>Número de Pedido:</strong><br>{{ order.numero_pedido }}</p>
+                <p><strong>Fecha:</strong><br>{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                <p><strong>Items:</strong> {{ order.get_cantidad_items() }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('user.orders') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a Mis Pedidos
+    </a>
+</div>
+{% endblock %}

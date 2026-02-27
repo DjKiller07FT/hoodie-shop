@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Carrito - Hoodie Shop{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="bi bi-cart3"></i> Carrito de Compras
+</h1>
+
+{% if cart_items %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('shop.update_cart') }}">
+                    {% for item in cart_items %}
+                    <div class="row align-items-center border-bottom py-3">
+                        <div class="col-md-2">
+                            <img src="{{ item.imagen }}" class="img-fluid rounded" alt="{{ item.nombre }}">
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="mb-1">{{ item.nombre }}</h5>
+                            <p class="text-muted mb-0">
+                                <small>Talla: {{ item.talla }} | Color: {{ item.color }}</small>
+                            </p>
+                        </div>
+                        <div class="col-md-2">
+                            <p class="mb-0 fw-bold">${{ "{:,.0f}".format(item.precio_unitario) }}</p>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" 
+                                   name="cantidad_{{ loop.index0 }}" 
+                                   class="form-control form-control-sm" 
+                                   value="{{ item.cantidad }}" 
+                                   min="1" 
+                                   max="10">
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <p class="mb-2 fw-bold text-primary">${{ "{:,.0f}".format(item.subtotal) }}</p>
+                            <a href="{{ url_for('shop.remove_from_cart', index=loop.index0) }}" 
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('¿Eliminar este item?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-clockwise"></i> Actualizar Carrito
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Resumen del Pedido</h5>
+                <hr>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal:</span>
+                    <span class="fw-bold">${{ "{:,.0f}".format(total) }} COP</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Envío:</span>
+                    <span class="text-success">Contraentrega</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="h5">Total:</span>
+                    <span class="h5 text-primary">${{ "{:,.0f}".format(total) }} COP</span>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('shop.checkout') }}" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle"></i> Proceder al Pago
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                    </a>
+                    <p class="text-center text-muted mb-0">
+                        <small>Debes iniciar sesión para continuar</small>
+                    </p>
+                    {% endif %}
+                    <a href="{{ url_for('shop.catalog') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Seguir Comprando
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-cart-x display-1 text-muted"></i>
+    <h3 class="mt-3">Tu carrito está vacío</h3>
+    <p class="text-muted">¡Explora nuestro catálogo y agrega productos!</p>
+    <a href="{{ url_for('shop.catalog') }}" class="btn btn-primary">
+        <i class="bi bi-grid"></i> Ver Catálogo
+    </a>
+</div>
+{% endif %}
+{% endblock %}
