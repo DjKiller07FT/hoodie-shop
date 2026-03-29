@@ -55,9 +55,22 @@ class ProductionConfig(Config):
     TESTING = False
 
 
+class TestingConfig(Config):
+    """Configuración para pruebas automatizadas"""
+    DEBUG = True
+    TESTING = True
+    # Evita llamadas reales a MongoDB durante los tests
+    MONGO_URI = 'mongodb://localhost/hoodie_shop_test'
+    # Desactiva protección CSRF en formularios
+    WTF_CSRF_ENABLED = False
+    # Sesiones en memoria (no en filesystem)
+    SESSION_TYPE = 'null'
+
+
 # Diccionario de configuraciones
 config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
+    'testing': TestingConfig,
     'default': DevelopmentConfig
 }
